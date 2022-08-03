@@ -2,8 +2,8 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 import { API_BASE } from "../../utils/consts";
-import { addTodo, deleteTodo } from "./todosSlice";
-import { TodoReq } from "./types";
+import { addTodo, deleteTodo, editTodo } from "./todosSlice";
+import { Todo, TodoReq } from "./types";
 
 export const getTodosAsync = createAsyncThunk("todos/getTodos", async () => {
   const { data } = await axios.get(API_BASE + `/tasks`);
@@ -29,5 +29,18 @@ export const addTodoAsync = createAsyncThunk(
     });
 
     dispatch(addTodo(data.task));
+  }
+);
+
+export const editTodoAsync = createAsyncThunk(
+  "todos/editTodo",
+  async (todo: Todo, { dispatch }) => {
+    await axios.post(API_BASE + `/task/update`, {
+      id: todo.id,
+      title: todo.title,
+      description: todo.description,
+    });
+
+    dispatch(editTodo(todo));
   }
 );
