@@ -4,9 +4,11 @@ const app = require("express")();
 const fs = require("fs");
 let tasksContainer = null;
 try {
-    tasksContainer = JSON.parse(fs.readFileSync(__dirname + "/tasks.json", "utf8"));
+  tasksContainer = JSON.parse(
+    fs.readFileSync(__dirname + "/tasks.json", "utf8")
+  );
 } catch (err) {
-    tasksContainer = { tasks: [] };
+  tasksContainer = { tasks: [] };
 }
 const cors = require("cors");
 const bodyParser = require("body-parser");
@@ -21,7 +23,7 @@ app.use(cors());
  * Return the list of tasks with status code 200.
  */
 app.get("/tasks", (req, res) => {
-    return res.status(200).json(tasksContainer);
+  return res.status(200).json(tasksContainer);
 });
 
 /**
@@ -36,25 +38,25 @@ app.get("/tasks", (req, res) => {
  * If id is not valid number return status code 400.
  */
 app.get("/task/:id", (req, res) => {
-    const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id, 10);
 
-    if (!Number.isNaN(id)) {
-        const task = tasksContainer.tasks.find(item => item.id === id);
+  if (!Number.isNaN(id)) {
+    const task = tasksContainer.tasks.find((item) => item.id === id);
 
-        if (task !== null) {
-            return res.status(200).json({
-                task,
-            });
-        } else {
-            return res.status(404).json({
-                message: "Not found.",
-            });
-        }
+    if (task !== null) {
+      return res.status(200).json({
+        task,
+      });
     } else {
-        return res.status(400).json({
-            message: "Bad request.",
-        });
+      return res.status(404).json({
+        message: "Not found.",
+      });
     }
+  } else {
+    return res.status(400).json({
+      message: "Bad request.",
+    });
+  }
 });
 
 /**
@@ -70,25 +72,25 @@ app.get("/task/:id", (req, res) => {
  * If the provided id is not a valid number return a status code 400.
  */
 app.post("/task/update", jsonBodyParser, (req, res) => {
-    const id = parseInt(req.body?.id, 10);
+  const id = parseInt(req.body?.id, 10);
 
-    if (!Number.isNaN(id)) {
-        const task = tasksContainer.tasks.find(item => item.id === id);
+  if (!Number.isNaN(id)) {
+    const task = tasksContainer.tasks.find((item) => item.id === id);
 
-        if (task !== null) {
-            task.title = req.body.title;
-            task.description = req.body.description;
-            return res.status(204);
-        } else {
-            return res.status(404).json({
-                message: "Not found",
-            });
-        }
+    if (task !== null) {
+      task.title = req.body.title;
+      task.description = req.body.description;
+      return res.status(204);
     } else {
-        return res.status(400).json({
-            message: "Bad request",
-        });
+      return res.status(404).json({
+        message: "Not found",
+      });
     }
+  } else {
+    return res.status(400).json({
+      message: "Bad request",
+    });
+  }
 });
 
 /**
@@ -101,33 +103,34 @@ app.post("/task/update", jsonBodyParser, (req, res) => {
  * Return status code 201.
  */
 app.post("/task/create", jsonBodyParser, (req, res) => {
-    const task = {
-        id: Date.now(),
-        title: req.body?.title,
-        description: req.body?.description,
-    };
+  const task = {
+    id: Date.now(),
+    title: req.body?.title,
+    description: req.body?.description,
+  };
 
-    if (
-        tasksContainer?.tasks?.find(
-            _task => _task?.title === task?.title && _task?.description === task?.description
-        )
-    ) {
-        return res.status(403).json({
-            message: "Resource exist",
-        });
+  if (
+    tasksContainer?.tasks?.find(
+      (_task) =>
+        _task?.title === task?.title && _task?.description === task?.description
+    )
+  ) {
+    return res.status(403).json({
+      message: "Resource exist",
+    });
+  }
+  tasksContainer?.tasks?.push(task);
+
+  fs.writeFile("tasks.json", JSON.stringify(tasksContainer), "utf-8", (err) => {
+    if (err) {
+      return console.error(err);
     }
-    tasksContainer?.tasks?.push(task);
+    console.log("FILE UPDATED SUCCESS");
+  });
 
-    fs.writeFile("tasks.json", JSON.stringify(tasksContainer), "utf-8", err => {
-        if (err) {
-            return console.error(err);
-        }
-        console.log("FILE UPDATED SUCCESS");
-    });
-
-    return res.status(201).json({
-        message: "Resource created",
-    });
+  return res.status(201).json({
+    task,
+  });
 });
 
 /**
@@ -141,37 +144,42 @@ app.post("/task/create", jsonBodyParser, (req, res) => {
  * If the provided id is not a valid number return a status code 400.
  */
 app.delete("/task/delete/:id", (req, res) => {
-    const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id, 10);
 
-    if (!Number.isNaN(id)) {
-        const task = tasksContainer.tasks.find(item => item.id === id);
+  if (!Number.isNaN(id)) {
+    const task = tasksContainer.tasks.find((item) => item.id === id);
 
-        if (task) {
-            const taskIndex = tasksContainer.tasks;
-            tasksContainer.tasks.splice(taskIndex, 1);
+    if (task) {
+      const taskIndex = tasksContainer.tasks;
+      tasksContainer.tasks.splice(taskIndex, 1);
 
-            fs.writeFile("tasks.json", JSON.stringify(tasksContainer), "utf-8", err => {
-                if (err) {
-                    return console.error(err);
-                }
-                console.log("FILE UPDATED SUCCESS");
-            });
-
-            return res.status(200).json({
-                message: "Updated successfully",
-            });
-        } else {
-            return res.status(404).json({
-                message: "Not found",
-            });
+      fs.writeFile(
+        "tasks.json",
+        JSON.stringify(tasksContainer),
+        "utf-8",
+        (err) => {
+          if (err) {
+            return console.error(err);
+          }
+          console.log("FILE UPDATED SUCCESS");
         }
+      );
+
+      return res.status(200).json({
+        message: "Updated successfully",
+      });
     } else {
-        return res.status(400).json({
-            message: "Bad request",
-        });
+      return res.status(404).json({
+        message: "Not found",
+      });
     }
+  } else {
+    return res.status(400).json({
+      message: "Bad request",
+    });
+  }
 });
 
 app.listen(9001, () => {
-    process.stdout.write("the server is available on http://localhost:9001/\n");
+  process.stdout.write("the server is available on http://localhost:9001/\n");
 });
