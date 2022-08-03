@@ -28,6 +28,6 @@ export const addTodoAsync = createAsyncThunk(
       description: todo.description,
     });
 
-    dispatch(addTodo(data));
+    dispatch(addTodo(data.task));
   }
 );

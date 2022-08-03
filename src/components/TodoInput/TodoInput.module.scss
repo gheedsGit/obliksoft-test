@@ -1,0 +1,10 @@
+.container {
+  margin: 20px;
+  width: 60vw;
+  display: flex;
+  justify-content: space-between;
+
+  .label {
+    margin-right: 10px;
+  }
+}
